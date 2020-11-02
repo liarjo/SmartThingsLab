@@ -26,6 +26,8 @@ definition(
     appSetting "code"    
     appSetting "clientId"    
     appSetting "serialNumber"
+
+
 }
 
 
@@ -46,6 +48,7 @@ def updated() {
 	initialize()
 }
 
+
 def initialize() {
 	//1. Sync Switch status
     SyncSwitchStatus()
@@ -53,19 +56,22 @@ def initialize() {
     subscribe(theSwitch, "switch", switchHandler)
 }
 
-
 def switchHandler(evt) {
 	def currentState=updateCurrentDoorState()
     if (evt.value == "on") {
     	if (currentState=="closed") {
         	//Open Garage
             OpenDoor()
+            //Sync Status after 5 minutes
+            runIn(60*5, updated)
         }
     } else {
     	//event off
         if (currentState=="open") {
         	//Open Garage
             CloseDoor()
+            //Sync Status after 5 minutes
+            runIn(60*5, updated)
         }
     }
   log.debug "Event: $evt last state $currentState new state $theSwitch.currentSwitch"
@@ -132,4 +138,3 @@ def HTTPGet(params) {
         log.error params
     }
 }
-
